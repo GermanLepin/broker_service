@@ -1,3 +1,3 @@
 module front_end
 
-go 1.18
+go 1.21.1
