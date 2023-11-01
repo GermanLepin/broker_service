@@ -1,6 +1,7 @@
 go 1.21.1
 
 use (
-	./broker_service
-	./front_end_service
+	./authentication-service
+	./broker-service
+	./front-end-service
 )
