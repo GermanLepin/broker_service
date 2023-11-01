@@ -10,17 +10,15 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgconn"
-	_ "github.com/jackc/pgx/v4"
-	_ "github.com/jackc/pgx/v4/stdlib"
+	_ "github.com/jackc/pgx/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 const webPort = "80"
 
-var counts int64
-
 func main() {
 	conn := connectToDB()
-	if conn != nil {
+	if conn == nil {
 		log.Panic("Cannot connect to Postgres")
 	}
 
@@ -57,10 +55,12 @@ func openDB(dsn string) (*sql.DB, error) {
 func connectToDB() *sql.DB {
 	dsn := os.Getenv("DSN")
 
+	var counts int64
+
 	for {
 		connection, err := openDB(dsn)
 		if err != nil {
-			log.Println("Postgres is not ready yet ...")
+			log.Printf("Postgres is not ready yet, error %s", err)
 			counts++
 		} else {
 			log.Println("Connected to Postgres!")
