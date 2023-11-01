@@ -24,6 +24,7 @@ services:
       replicas: 1
     environment:
       DSN: "host=postgres port=5432 user=postgres password=password database=users sslmode=disable timezone=UTC connect_timeout=5"
+      migration_dir: "./../authentication-service/db/migrations"
 
   postgres:
     image: 'postgres:14.2'

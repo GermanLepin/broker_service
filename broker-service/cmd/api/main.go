@@ -11,7 +11,7 @@ const webPort = "80"
 func main() {
 	config := NewConfig()
 
-	log.Printf("Starting broker service on port %s\n", webPort)
+	log.Printf("starting broker service on port %s\n", webPort)
 
 	// define http service
 	srv := &http.Server{
