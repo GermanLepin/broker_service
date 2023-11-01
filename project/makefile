@@ -30,13 +30,13 @@ build_broker:
 ## build_front: builds the frone end binary
 build_front:
 	@echo "Building front end binary..."
-	cd ../front_end && env CGO_ENABLED=0 go build -o ${FRONT_END_BINARY} ./cmd/web
+	cd ../front_end_service && env CGO_ENABLED=0 go build -o ${FRONT_END_BINARY} ./cmd/web
 	@echo "Done!"
 
 ## start: starts the front end
 start: build_front
 	@echo "Starting front end"
-	cd ../front_end && ./${FRONT_END_BINARY} &
+	cd ../front_end_service && ./${FRONT_END_BINARY} &
 
 ## stop: stop the front end
 stop:
