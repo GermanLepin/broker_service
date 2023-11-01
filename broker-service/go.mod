@@ -1,4 +1,4 @@
-module broker_service
+module broker-service
 
 go 1.21.1
 
