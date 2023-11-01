@@ -1,5 +1,5 @@
-FRONT_END_BINARY=frontApp
-BROKER_BINARY=brokerApp
+FRONT_END_BINARY=binary_file/frontApp
+BROKER_BINARY=binary_file/brokerApp
 
 ## up: starts all containers in the background without forcing build
 up:
