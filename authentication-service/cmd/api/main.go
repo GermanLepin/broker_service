@@ -13,6 +13,7 @@ import (
 	_ "github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose"
+	//_ "authentication-service/db/migrations"
 )
 
 const webPort = "80"
@@ -23,8 +24,7 @@ func main() {
 		log.Panic("cannot connect to Postgres")
 	}
 
-	migration_dir := os.Getenv("migration_dir")
-	if err := goose.Up(conn, migration_dir); err != nil {
+	if err := goose.Up(conn, "/var"); err != nil {
 		log.Printf("the error is %s", err)
 		log.Panic("cannot make migrations")
 	}
@@ -67,7 +67,7 @@ func connectToDB() *sql.DB {
 	for {
 		connection, err := openDB(dsn)
 		if err != nil {
-			log.Printf("postgres is not ready yet, error %s", err)
+			log.Println("postgres is not ready yet, error")
 			counts++
 		} else {
 			log.Println("connected to Postgres!")

@@ -1,19 +1,7 @@
-package migrations
+-- +goose Up
+-- +goose StatementBegin
 
-import (
-	"context"
-	"database/sql"
-
-	"github.com/pressly/goose/v3"
-)
-
-func init() {
-	goose.AddMigrationContext(upInit, downInit)
-}
-
-func upInit(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.Exec(`
-	begin;
+begin;
 
 	create sequence public.user_id_seq
 	start with 1
@@ -50,14 +38,5 @@ func upInit(ctx context.Context, tx *sql.Tx) error {
 	values (E'admin@example.com',E'Admin',E'User',E'$2a$12$1zGLuYDDNvATh4RA4avbKuheAMpb1svexSzrQm7up.bnpwQHs0jNe',1,E'2022-03-14 00:00:00',E'2022-03-14 00:00:00');
 	
 	commit;
-	`)
-	if err != nil {
-		return err
-	}
 
-	return nil
-}
-
-func downInit(ctx context.Context, tx *sql.Tx) error {
-	return nil
-}
+-- +goose StatementEnd
