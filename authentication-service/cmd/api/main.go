@@ -1,7 +1,7 @@
 package main
 
 import (
-	"authentication-service/data"
+	"authentication-service/repository"
 	"database/sql"
 	"fmt"
 	"log"
@@ -12,6 +12,7 @@ import (
 	_ "github.com/jackc/pgconn"
 	_ "github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose"
 )
 
 const webPort = "80"
@@ -19,12 +20,16 @@ const webPort = "80"
 func main() {
 	conn := connectToDB()
 	if conn == nil {
-		log.Panic("Cannot connect to Postgres")
+		log.Panic("cannot connect to Postgres")
+	}
+
+	if err := goose.Up(conn, "/var"); err != nil {
+		log.Panic("cannot do the migrations")
 	}
 
 	config := NewConfig(conn)
 
-	log.Printf("Starting authentication service on port %s\n", webPort)
+	log.Printf("starting authentication service on port %s\n", webPort)
 
 	// define http service
 	srv := &http.Server{
@@ -60,10 +65,10 @@ func connectToDB() *sql.DB {
 	for {
 		connection, err := openDB(dsn)
 		if err != nil {
-			log.Printf("Postgres is not ready yet, error %s", err)
+			log.Println("postgres is not ready yet")
 			counts++
 		} else {
-			log.Println("Connected to Postgres!")
+			log.Println("connected to Postgres!")
 			return connection
 		}
 
@@ -72,7 +77,7 @@ func connectToDB() *sql.DB {
 			return nil
 		}
 
-		log.Println("Backing off for 2 seconds...")
+		log.Println("backing off for 2 seconds...")
 		time.Sleep(2 * time.Second)
 		continue
 	}
@@ -80,12 +85,12 @@ func connectToDB() *sql.DB {
 
 type Config struct {
 	DB     *sql.DB
-	Models data.Models
+	Models repository.Models
 }
 
 func NewConfig(conn *sql.DB) *Config {
 	return &Config{
 		DB:     conn,
-		Models: data.New(conn),
+		Models: repository.New(conn),
 	}
 }
