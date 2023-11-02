@@ -1,12 +1,10 @@
 -- +goose Up
 -- +goose StatementBegin
 
-begin;
-
 	create sequence public.user_id_seq
 	start with 1
 	increment by 1
-	no minvalue
+	no minvaluex
 	no maxvalue 
 	cashe 1;
 	
@@ -36,7 +34,5 @@ begin;
 	
 	insert into "public"."users"("email","first_name","last_name","password","user_active","created_at","updated_at")
 	values (E'admin@example.com',E'Admin',E'User',E'$2a$12$1zGLuYDDNvATh4RA4avbKuheAMpb1svexSzrQm7up.bnpwQHs0jNe',1,E'2022-03-14 00:00:00',E'2022-03-14 00:00:00');
-	
-	commit;
 
 -- +goose StatementEnd
