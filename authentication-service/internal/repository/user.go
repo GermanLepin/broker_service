@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"authentication-service/internal/dto"
 	"context"
 	"database/sql"
 	"errors"
@@ -13,32 +14,7 @@ import (
 
 const dbTimeout = time.Second * 3
 
-var db *sql.DB
-
-func New(dbPool *sql.DB) Models {
-	db = dbPool
-
-	return Models{
-		User: User{},
-	}
-}
-
-type Models struct {
-	User User
-}
-
-type User struct {
-	ID        int       `json:"id"`
-	Email     string    `json:"email"`
-	FirstName string    `json:"first_name,omitempty"`
-	LastName  string    `json:"last_name,omitempty"`
-	Password  string    `json:"-"`
-	Active    int       `json:"active"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-func (u *User) GetAll() ([]*User, error) {
+func GetAll() ([]*dto.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -51,10 +27,10 @@ func (u *User) GetAll() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	var users []*User
+	var users []*dto.User
 
 	for rows.Next() {
-		var user User
+		var user dto.User
 		err := rows.Scan(
 			&user.ID,
 			&user.Email,
@@ -76,13 +52,13 @@ func (u *User) GetAll() ([]*User, error) {
 	return users, nil
 }
 
-func (u *User) GetUserByEmail(email string) (*User, error) {
+func GetUserByEmail(email string) (*dto.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at from service.users where email = $1`
 
-	var user User
+	var user dto.User
 	row := db.QueryRowContext(ctx, query, email)
 
 	err := row.Scan(
@@ -103,13 +79,13 @@ func (u *User) GetUserByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (u *User) GetUserById(id int) (*User, error) {
+func GetUserById(id int) (*dto.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at from service.users where id = $1`
 
-	var user User
+	var user dto.User
 	row := db.QueryRowContext(ctx, query, id)
 
 	err := row.Scan(
@@ -130,7 +106,7 @@ func (u *User) GetUserById(id int) (*User, error) {
 	return &user, nil
 }
 
-func (u *User) UpdateUserById() error {
+func UpdateUserById(u dto.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -159,7 +135,7 @@ func (u *User) UpdateUserById() error {
 	return nil
 }
 
-func (u *User) DeleteByID(id int) error {
+func DeleteByID(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -173,7 +149,7 @@ func (u *User) DeleteByID(id int) error {
 	return nil
 }
 
-func (u *User) Insert(user User) (int, error) {
+func Insert(user dto.User) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -203,7 +179,7 @@ func (u *User) Insert(user User) (int, error) {
 	return newID, nil
 }
 
-func (u *User) ResetPassword(password string) error {
+func ResetPassword(password string, u dto.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -224,7 +200,7 @@ func (u *User) ResetPassword(password string) error {
 // PasswordMatches uses Go's bcrypt package to compare a user supplied password
 // with the hash we have stored for a given user in the database. If the password
 // and hash match, we return true; otherwise, we return false.
-func (u *User) PasswordMatches(plainText string) (bool, error) {
+func PasswordMatches(plainText string, u dto.User) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plainText))
 	fmt.Println(err)
 
@@ -239,4 +215,18 @@ func (u *User) PasswordMatches(plainText string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+var db *sql.DB
+
+type Models struct {
+	User dto.User
+}
+
+func New(dbPool *sql.DB) Models {
+	db = dbPool
+
+	return Models{
+		User: dto.User{},
+	}
 }

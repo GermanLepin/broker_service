@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"net/http"
@@ -8,7 +8,11 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func (c *Config) routes() http.Handler {
+type AuthenticateService interface {
+	Authenticate(w http.ResponseWriter, r *http.Request)
+}
+
+func (s *service) Routes() http.Handler {
 	mux := chi.NewRouter()
 
 	// specify who is allowed to connect
@@ -23,7 +27,17 @@ func (c *Config) routes() http.Handler {
 
 	mux.Use(middleware.Heartbeat("/ping"))
 
-	mux.Post("/authenticate", c.Authenticate)
+	mux.Post("/authenticate", s.authenticateService.Authenticate)
 
 	return mux
+}
+
+func New(authenticateService AuthenticateService) *service {
+	return &service{
+		authenticateService: authenticateService,
+	}
+}
+
+type service struct {
+	authenticateService AuthenticateService
 }
