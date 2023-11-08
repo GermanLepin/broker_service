@@ -12,7 +12,7 @@ type AuthenticateService interface {
 	Authenticate(w http.ResponseWriter, r *http.Request)
 }
 
-func (s *service) Routes() http.Handler {
+func (s *service) NewRoutes() http.Handler {
 	mux := chi.NewRouter()
 
 	// specify who is allowed to connect

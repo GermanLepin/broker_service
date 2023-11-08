@@ -1,4 +1,4 @@
-package service
+package authentication_service
 
 import (
 	"authentication-service/internal/dto"
@@ -7,16 +7,18 @@ import (
 	"net/http"
 )
 
-type JsonService interface {
-	ErrorJSON(w http.ResponseWriter, err error, status ...int) error
-	WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Header) error
-	ReadJSON(w http.ResponseWriter, r *http.Request, data any) error
-}
+type (
+	JsonService interface {
+		ErrorJSON(w http.ResponseWriter, err error, status ...int) error
+		WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Header) error
+		ReadJSON(w http.ResponseWriter, r *http.Request, data any) error
+	}
 
-type UserRepository interface {
-	GetUserByEmail(email string) (*dto.User, error)
-	PasswordMatches(plainText string, u dto.User) (bool, error)
-}
+	UserRepository interface {
+		GetUserByEmail(email string) (*dto.User, error)
+		PasswordMatches(plainText string, u dto.User) (bool, error)
+	}
+)
 
 func (s *service) Authenticate(w http.ResponseWriter, r *http.Request) {
 	var requestPayload dto.RequestPayload
@@ -34,9 +36,6 @@ func (s *service) Authenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(requestPayload.Password)
-	fmt.Println(user.Password)
-
 	valid, err := s.userRepository.PasswordMatches(requestPayload.Password, *user)
 	if err != nil || !valid {
 		s.jsonService.ErrorJSON(w, errors.New("invalid credentials"), http.StatusBadRequest)
@@ -48,8 +47,6 @@ func (s *service) Authenticate(w http.ResponseWriter, r *http.Request) {
 		Message: fmt.Sprintf("logged in user %s", user.Email),
 		Data:    user,
 	}
-
-	fmt.Println(payload)
 
 	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
 }

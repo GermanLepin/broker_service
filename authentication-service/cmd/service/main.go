@@ -1,7 +1,11 @@
 package main
 
 import (
+	"authentication-service/internal/application/adapter/api/routes"
 	"authentication-service/internal/repository"
+	"authentication-service/internal/service/authentication_service"
+	"authentication-service/internal/service/json_service"
+
 	"database/sql"
 	"fmt"
 	"log"
@@ -19,7 +23,30 @@ import (
 const webPort = "80"
 
 func main() {
-	conn := connectToDB()
+	conn := startDB()
+
+	log.Printf("starting authentication service on port %s\n", webPort)
+
+	userRepository := repository.New(conn)
+	jsonService := json_service.New()
+	authenticationService := authentication_service.New(jsonService, &userRepository)
+	api_routes := routes.New(authenticationService)
+
+	// define http service
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: api_routes.NewRoutes(),
+	}
+
+	// start the service
+	err := srv.ListenAndServe()
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+func startDB() (conn *sql.DB) {
+	conn = connectToDB()
 	if conn == nil {
 		log.Panic("cannot connect to Postgres")
 	}
@@ -28,21 +55,7 @@ func main() {
 		log.Panic("cannot do the migrations")
 	}
 
-	config := NewConfig(conn)
-
-	log.Printf("starting authentication service on port %s\n", webPort)
-
-	// define http service
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", webPort),
-		Handler: config.routes(),
-	}
-
-	// start the service
-	err := srv.ListenAndServe()
-	if err != nil {
-		log.Panic(err)
-	}
+	return conn
 }
 
 func openDB(dsn string) (*sql.DB, error) {
@@ -81,17 +94,5 @@ func connectToDB() *sql.DB {
 		log.Println("backing off for 2 seconds...")
 		time.Sleep(2 * time.Second)
 		continue
-	}
-}
-
-type Config struct {
-	DB     *sql.DB
-	Models repository.Models
-}
-
-func NewConfig(conn *sql.DB) *Config {
-	return &Config{
-		DB:     conn,
-		Models: repository.New(conn),
 	}
 }

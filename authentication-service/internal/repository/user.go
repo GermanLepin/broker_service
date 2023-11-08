@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -14,7 +13,9 @@ import (
 
 const dbTimeout = time.Second * 3
 
-func GetAll() ([]*dto.User, error) {
+var db *sql.DB
+
+func (r *repository) GetAll() ([]*dto.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -52,7 +53,7 @@ func GetAll() ([]*dto.User, error) {
 	return users, nil
 }
 
-func GetUserByEmail(email string) (*dto.User, error) {
+func (r *repository) GetUserByEmail(email string) (*dto.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -79,7 +80,7 @@ func GetUserByEmail(email string) (*dto.User, error) {
 	return &user, nil
 }
 
-func GetUserById(id int) (*dto.User, error) {
+func (r *repository) GetUserById(id int) (*dto.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -106,7 +107,7 @@ func GetUserById(id int) (*dto.User, error) {
 	return &user, nil
 }
 
-func UpdateUserById(u dto.User) error {
+func (r *repository) UpdateUserById(u dto.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -135,7 +136,7 @@ func UpdateUserById(u dto.User) error {
 	return nil
 }
 
-func DeleteByID(id int) error {
+func (r *repository) DeleteByID(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -149,7 +150,7 @@ func DeleteByID(id int) error {
 	return nil
 }
 
-func Insert(user dto.User) (int, error) {
+func (r *repository) Insert(user dto.User) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -179,7 +180,7 @@ func Insert(user dto.User) (int, error) {
 	return newID, nil
 }
 
-func ResetPassword(password string, u dto.User) error {
+func (r *repository) ResetPassword(password string, u dto.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -200,10 +201,8 @@ func ResetPassword(password string, u dto.User) error {
 // PasswordMatches uses Go's bcrypt package to compare a user supplied password
 // with the hash we have stored for a given user in the database. If the password
 // and hash match, we return true; otherwise, we return false.
-func PasswordMatches(plainText string, u dto.User) (bool, error) {
+func (r *repository) PasswordMatches(plainText string, u dto.User) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(plainText))
-	fmt.Println(err)
-
 	if err != nil {
 		switch {
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
@@ -217,16 +216,10 @@ func PasswordMatches(plainText string, u dto.User) (bool, error) {
 	return true, nil
 }
 
-var db *sql.DB
-
-type Models struct {
-	User dto.User
+type repository struct {
+	db *sql.DB
 }
 
-func New(dbPool *sql.DB) Models {
-	db = dbPool
-
-	return Models{
-		User: dto.User{},
-	}
+func New(db *sql.DB) repository {
+	return repository{db: db}
 }

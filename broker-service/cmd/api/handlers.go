@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 )
 
@@ -52,6 +51,7 @@ func (c *Config) authenticate(w http.ResponseWriter, a AuthenticationPayload) {
 		c.errorJSON(w, err)
 		return
 	}
+	request.Close = true
 
 	client := &http.Client{}
 	response, err := client.Do(request)
@@ -60,8 +60,6 @@ func (c *Config) authenticate(w http.ResponseWriter, a AuthenticationPayload) {
 		return
 	}
 	defer response.Body.Close()
-
-	fmt.Println(response)
 
 	// make sure we get back the correct status code
 	if response.StatusCode == http.StatusUnauthorized {
