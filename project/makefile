@@ -31,7 +31,7 @@ build_broker:
 ## authentication: builds the authentication binary as a linux executable
 build_authentication:
 	@echo "Building authentication binary..."
-	cd ../authentication-service && env GOOS=linux CGO_ENABLED=0 go build -o ${AUTHENTICATION_BINARY} ./cmd/api
+	cd ../authentication-service && env GOOS=linux CGO_ENABLED=0 go build -o ${AUTHENTICATION_BINARY} ./cmd/service
 	@echo "Done!"
 
 ## build_front: builds the frone end binary

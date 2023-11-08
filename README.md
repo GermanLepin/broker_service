@@ -7,6 +7,7 @@ More information about every service can be found below:
 - [Front-end-service](/front-end-service/README.md) 
 - [Broker-service](/broker-service/README.md) 
 - [Authentication-service](/authentication-service/README.md) 
+- [Logger-service](/logger-service/README.md) 
 
 In the `project` can be found all files with basic commands and the main `docker-compose.yml`
 
