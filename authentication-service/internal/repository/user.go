@@ -13,8 +13,6 @@ import (
 
 const dbTimeout = time.Second * 3
 
-var db *sql.DB
-
 func (r *repository) GetAll() ([]*dto.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
@@ -22,7 +20,7 @@ func (r *repository) GetAll() ([]*dto.User, error) {
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at
 	from service.users order by last_name`
 
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +58,7 @@ func (r *repository) GetUserByEmail(email string) (*dto.User, error) {
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at from service.users where email = $1`
 
 	var user dto.User
-	row := db.QueryRowContext(ctx, query, email)
+	row := r.db.QueryRowContext(ctx, query, email)
 
 	err := row.Scan(
 		&user.ID,
@@ -72,7 +70,6 @@ func (r *repository) GetUserByEmail(email string) (*dto.User, error) {
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +84,7 @@ func (r *repository) GetUserById(id int) (*dto.User, error) {
 	query := `select id, email, first_name, last_name, password, user_active, created_at, updated_at from service.users where id = $1`
 
 	var user dto.User
-	row := db.QueryRowContext(ctx, query, id)
+	row := r.db.QueryRowContext(ctx, query, id)
 
 	err := row.Scan(
 		&user.ID,
@@ -99,7 +96,6 @@ func (r *repository) GetUserById(id int) (*dto.User, error) {
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +116,7 @@ func (r *repository) UpdateUserById(u dto.User) error {
 		where id = $6
 	`
 
-	_, err := db.ExecContext(ctx, stmt,
+	_, err := r.db.ExecContext(ctx, stmt,
 		u.Email,
 		u.FirstName,
 		u.LastName,
@@ -128,7 +124,6 @@ func (r *repository) UpdateUserById(u dto.User) error {
 		time.Now(),
 		u.ID,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -142,7 +137,7 @@ func (r *repository) DeleteByID(id int) error {
 
 	stmt := `delete from service.users where id = $1`
 
-	_, err := db.ExecContext(ctx, stmt, id)
+	_, err := r.db.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
 	}
@@ -163,7 +158,7 @@ func (r *repository) Insert(user dto.User) (int, error) {
 	stmt := `insert into service.users (email, first_name, last_name, password, user_active, created_at, updated_at)
 		values ($1, $2, $3, $4, $5, $6, $7) returning id`
 
-	err = db.QueryRowContext(ctx, stmt,
+	err = r.db.QueryRowContext(ctx, stmt,
 		user.Email,
 		user.FirstName,
 		user.LastName,
@@ -172,7 +167,6 @@ func (r *repository) Insert(user dto.User) (int, error) {
 		time.Now(),
 		time.Now(),
 	).Scan(&newID)
-
 	if err != nil {
 		return 0, err
 	}
@@ -190,7 +184,7 @@ func (r *repository) ResetPassword(password string, u dto.User) error {
 	}
 
 	stmt := `update service.users set password = $1 where id = $2`
-	_, err = db.ExecContext(ctx, stmt, hashedPassword, u.ID)
+	_, err = r.db.ExecContext(ctx, stmt, hashedPassword, u.ID)
 	if err != nil {
 		return err
 	}
@@ -220,6 +214,6 @@ type repository struct {
 	db *sql.DB
 }
 
-func New(db *sql.DB) repository {
-	return repository{db: db}
+func New(db *sql.DB) *repository {
+	return &repository{db: db}
 }
