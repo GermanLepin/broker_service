@@ -1,6 +1,7 @@
-FRONT_END_BINARY=binary_file/frontApp
-BROKER_BINARY=binary_file/brokerApp
-AUTHENTICATION_BINARY=binary_file/authenticationApp
+FRONT_END_BINARY=binary_file/frontEndServiceApp
+BROKER_BINARY=binary_file/brokerServiceApp
+AUTHENTICATION_BINARY=binary_file/authenticationServiceApp
+LOGGER_BINARY=binary_file/loggerServiceApp
 
 ## up: starts all containers in the background without forcing build
 up:
@@ -9,7 +10,7 @@ up:
 	@echo "Docker images started!"
 
 ## up_build: stops docker-compose (if running), builds all projects and starts docker compose
-up_build: build_broker build_authentication
+up_build: build_broker build_authentication build_logger
 	@echo "Stopping docker images (if running...)"
 	docker-compose down
 	@echo "Building (when required) and starting docker images..."
@@ -22,7 +23,7 @@ down:
 	docker-compose down
 	@echo "Done!"
 
-## build_broker: builds the broker binary as a linux executable
+## broker: builds the broker binary as a linux executable
 build_broker:
 	@echo "Building broker binary..."
 	cd ../broker-service && env GOOS=linux CGO_ENABLED=0 go build -o ${BROKER_BINARY} ./cmd/service
@@ -32,6 +33,12 @@ build_broker:
 build_authentication:
 	@echo "Building authentication binary..."
 	cd ../authentication-service && env GOOS=linux CGO_ENABLED=0 go build -o ${AUTHENTICATION_BINARY} ./cmd/service
+	@echo "Done!"
+
+## logger: builds the logger binary as a linux executable
+build_logger:
+	@echo "Building logger binary..."
+	cd ../logger-service && env GOOS=linux CGO_ENABLED=0 go build -o ${LOGGER_BINARY} ./cmd/service
 	@echo "Done!"
 
 ## build_front: builds the frone end binary
@@ -45,7 +52,7 @@ start: build_front
 	@echo "Starting front end"
 	cd ../front-end-service && ./${FRONT_END_BINARY} &
 
-## stop: stop the front end
+## stop: stops the front end
 stop:
 	@echo "Stopping front end..."
 	@-pkill -SIGTERM -f "./${FRONT_END_BINARY}"
