@@ -48,6 +48,7 @@ services:
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
 
+# mongodb://admin:password@localhost:27017/logs?authSource=admin&readPreference=primary&appname=MongDB%20Compass&directConnection=true&ssl=false
   mongo:
     image: 'mongo:7.0.4'
     ports:
