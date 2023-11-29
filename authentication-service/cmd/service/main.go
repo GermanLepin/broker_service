@@ -20,8 +20,6 @@ const webPort = "80"
 
 func main() {
 	conn := connection.StartDB()
-	log.Printf("starting authentication service on port %s\n", webPort)
-
 	userRepository := repository.New(conn)
 
 	jsonService := json_service.New()
@@ -29,13 +27,12 @@ func main() {
 
 	api_routes := routes.New(authenticationService)
 
-	// define http service
+	log.Printf("starting authentication service on port %s\n", webPort)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", webPort),
 		Handler: api_routes.NewRoutes(),
 	}
 
-	// start the service
 	err := srv.ListenAndServe()
 	if err != nil {
 		log.Panic(err)

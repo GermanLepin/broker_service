@@ -27,16 +27,53 @@ func (s *service) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 
 	switch requestPayload.Action {
 	case "authentication":
-		s.authenticate(w, requestPayload.AuthPayload)
+		s.authenticate(w, requestPayload.AuthenticationPayload)
+	case "logging":
+		s.loggingItem(w, requestPayload.LoggingPayload)
 	default:
 		s.jsonService.ErrorJSON(w, errors.New("unknown action"))
 	}
 }
 
-func (s *service) authenticate(w http.ResponseWriter, a dto.AuthenticationPayload) {
-	jsonData, _ := json.MarshalIndent(a, "", "\t")
+func (s *service) loggingItem(w http.ResponseWriter, entry dto.LoggingPayload) {
+	jsonData, _ := json.MarshalIndent(entry, "", "\t")
 
-	request, err := http.NewRequest("POST", "http://authentication-service/authenticate", bytes.NewBuffer(jsonData))
+	loggerServiceURL := "http://logger-service/log"
+
+	request, err := http.NewRequest(http.MethodPost, loggerServiceURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		s.jsonService.ErrorJSON(w, err)
+		return
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		s.jsonService.ErrorJSON(w, err)
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusAccepted {
+		s.jsonService.ErrorJSON(w, err)
+		return
+	}
+
+	var payload dto.JsonResponse
+	payload.Error = false
+	payload.Message = "logged"
+
+	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
+}
+
+func (s *service) authenticate(w http.ResponseWriter, entry dto.AuthenticationPayload) {
+	jsonData, _ := json.MarshalIndent(entry, "", "\t")
+
+	authenticationServiceURL := "http://authentication-service/authenticate"
+
+	request, err := http.NewRequest(http.MethodPost, authenticationServiceURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		s.jsonService.ErrorJSON(w, err)
 		return
@@ -60,7 +97,6 @@ func (s *service) authenticate(w http.ResponseWriter, a dto.AuthenticationPayloa
 		return
 	}
 
-	// create a varabiel we'll read response.Body into
 	var jsonFromService dto.JsonResponse
 	err = json.NewDecoder(response.Body).Decode(&jsonFromService)
 	if err != nil {
@@ -75,7 +111,7 @@ func (s *service) authenticate(w http.ResponseWriter, a dto.AuthenticationPayloa
 
 	var payload dto.JsonResponse
 	payload.Error = false
-	payload.Message = "Authenticated!"
+	payload.Message = "authenticated"
 	payload.Data = jsonFromService.Data
 
 	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
