@@ -24,9 +24,9 @@ const (
 var client *mongo.Client
 
 func main() {
-	mongoClient, err := connection.ConnectToMongo()
-	if err != nil {
-		log.Panic(err)
+	mongoClient := connection.ConnectToMongo()
+	if mongoClient == nil {
+		log.Panic("cannot connect to Mongo")
 	}
 
 	// create a context in order to disconnect
@@ -34,7 +34,7 @@ func main() {
 	defer cancel()
 
 	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
+		if err := client.Disconnect(ctx); err != nil {
 			panic(err)
 		}
 	}()
@@ -52,7 +52,7 @@ func main() {
 		Handler: api_routes.NewRoutes(),
 	}
 
-	err = srv.ListenAndServe()
+	err := srv.ListenAndServe()
 	if err != nil {
 		log.Panic(err)
 	}

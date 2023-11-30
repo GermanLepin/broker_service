@@ -48,14 +48,15 @@ services:
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
 
-# mongodb://admin:password@localhost:27017/logs?authSource=admin&readPreference=primary&appname=MongDB%20Compass&directConnection=true&ssl=false
+# mongo://mongousradmin:mongopassadmin@localhost:27017/logs?authSource=admin&readPreference=primary&appname=MongDB%20Compass&directConnection=true&ssl=false
   mongo:
     image: 'mongo:7.0.4'
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: logs
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: logs
+    restart: always
     volumes:
       - ./db-data/mongo/:/data/db

@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/pressly/goose"
-
 	_ "authentication-service/db/postgres/changelog"
+
+	"github.com/pressly/goose"
 )
 
 var (
@@ -24,6 +24,8 @@ func StartDB() *sql.DB {
 	if err := goose.Up(conn, "/var"); err != nil {
 		log.Panic("cannot run the migrations")
 	}
+
+	// if smth goes wrong we always can run down Migrations goose.Down()
 
 	return conn
 }
