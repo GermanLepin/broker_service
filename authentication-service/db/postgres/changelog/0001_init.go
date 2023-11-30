@@ -12,6 +12,8 @@ func init() {
 
 func upInit(tx *sql.Tx) error {
 	_, err := tx.Exec(`
+		create schema service;
+
 		create sequence service.user_id_seq
 		start with 1
 		increment by 1
