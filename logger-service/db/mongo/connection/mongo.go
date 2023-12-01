@@ -19,8 +19,8 @@ func ConnectToMongo() *mongo.Client {
 	for {
 		clientOptions := options.Client().ApplyURI(mongoURL)
 		clientOptions.SetAuth(options.Credential{
-			Username: "mongousradmin",
-			Password: "mongopassadmin",
+			Username: "admin",
+			Password: "password",
 		})
 
 		connection, err := mongo.Connect(context.TODO(), clientOptions)
@@ -28,7 +28,7 @@ func ConnectToMongo() *mongo.Client {
 			log.Println("error connecting:", err)
 			counts++
 		} else {
-			log.Println("connected to Mongo!")
+			log.Println("connected to Mongo")
 			return connection
 		}
 

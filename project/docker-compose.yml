@@ -5,27 +5,26 @@ services:
     build:
       context: ./../broker-service
       dockerfile: ./../broker-service/broker-service.dockerfile
-    restart: always
     ports:
       - "8080:80"
     deploy:
       mode: replicated
       replicas: 1
+    restart: always
 
   logger-service:
     build:
       context: ./../logger-service
       dockerfile: ./../logger-service/logger-service.dockerfile
-    restart: always
     deploy:
       mode: replicated
       replicas: 1
+    restart: always
 
   authentication-service:
     build:
       context: ./../authentication-service
       dockerfile: ./../authentication-service/authentication-service.dockerfile
-    restart: always
     ports:
       - "8081:80"
     deploy:
@@ -33,6 +32,7 @@ services:
       replicas: 1
     environment:
       DSN: "host=postgres port=5432 user=postgres password=password database=users sslmode=disable timezone=UTC connect_timeout=5"
+    restart: always
 
   postgres:
     image: 'postgres:14.2'
@@ -45,10 +45,11 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: users
+    restart: always
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
 
-# mongo://mongousradmin:mongopassadmin@localhost:27017/logs?authSource=admin&readPreference=primary&appname=MongDB%20Compass&directConnection=true&ssl=false
+# mongo://admin:password@localhost:27017/logs?authSource=admin&readPreference=primary&appname=MongDB%20Compass&directConnection=true&ssl=false
   mongo:
     image: 'mongo:7.0.4'
     ports:
