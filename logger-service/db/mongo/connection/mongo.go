@@ -3,6 +3,7 @@ package connection
 import (
 	"context"
 	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -12,20 +13,32 @@ const (
 	mongoURL = "mongodb://mongo:27017"
 )
 
-func ConnectToMongo() (*mongo.Client, error) {
-	clientOptions := options.Client().ApplyURI(mongoURL)
-	clientOptions.SetAuth(options.Credential{
-		Username: "admin",
-		Password: "password",
-	})
+func ConnectToMongo() *mongo.Client {
+	var counts int64
 
-	conn, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Println("error connecting:", err)
-		return nil, err
+	for {
+		clientOptions := options.Client().ApplyURI(mongoURL)
+		clientOptions.SetAuth(options.Credential{
+			Username: "admin",
+			Password: "password",
+		})
+
+		connection, err := mongo.Connect(context.TODO(), clientOptions)
+		if err != nil {
+			log.Println("error connecting:", err)
+			counts++
+		} else {
+			log.Println("connected to Mongo")
+			return connection
+		}
+
+		if counts > 10 {
+			log.Println(err)
+			return nil
+		}
+
+		log.Println("backing off for 2 seconds...")
+		time.Sleep(2 * time.Second)
+		continue
 	}
-
-	log.Println("Connected to Mongo")
-
-	return conn, nil
 }
