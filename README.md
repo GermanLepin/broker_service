@@ -1,13 +1,14 @@
 Broker
 =============
 
-In this repository, I have designed four services. The front-end part is already created, and the authentication service, broker service, and logger service are also written.
+In this repository, I have designed four services. The front-end part is already created, and the authentication service, broker service, mail service, and logger service are also written.
 
 More information about every service can be found below:
 - [Front-end-service](/front-end-service/README.md) 
 - [Broker-service](/broker-service/README.md) 
 - [Authentication-service](/authentication-service/README.md) 
 - [Logger-service](/logger-service/README.md) 
+- [Mail-service](/mail-service/README.md) 
 
 In the `project` can be found all files with basic commands and the main `docker-compose.yml`
 

@@ -8,13 +8,11 @@ import (
 	"net/http"
 )
 
-type (
-	JsonService interface {
-		ErrorJSON(w http.ResponseWriter, err error, status ...int) error
-		WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Header) error
-		ReadJSON(w http.ResponseWriter, r *http.Request, data any) error
-	}
-)
+type JsonService interface {
+	ErrorJSON(w http.ResponseWriter, err error, status ...int) error
+	WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Header) error
+	ReadJSON(w http.ResponseWriter, r *http.Request, data any) error
+}
 
 func (s *service) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 	var requestPayload dto.RequestPayload
