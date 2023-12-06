@@ -14,7 +14,7 @@ func main() {
 		render(w, "main.page.gohtml")
 	})
 
-	log.Printf("starting front end service on port %s\n", webPort)
+	log.Printf("starting front-end service on port %s\n", webPort)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", webPort), nil); err != nil {
 		log.Panic(err)
 	}

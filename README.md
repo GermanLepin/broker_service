@@ -1,39 +1,43 @@
-Broker
+My broker
 =============
 
-In this repository, I have designed four services. The front-end part is already created, and the authentication service, broker service, mail service, and logger service are also written.
+In this repository, I have designed six services. The front-end part is already created, and the authentication service, broker service, mail service, listener service,and logger service are also written.
 
 More information about every service can be found below:
-- [Front-end-service](/front-end-service/README.md) 
-- [Broker-service](/broker-service/README.md) 
-- [Authentication-service](/authentication-service/README.md) 
-- [Logger-service](/logger-service/README.md) 
-- [Mail-service](/mail-service/README.md) 
+- [Front-end-service](/front-end-service/README.md)
+- [Broker-service](/broker-service/README.md)
+- [Authentication-service](/authentication-service/README.md)
+- [Logger-service](/logger-service/README.md)
+- [Mail-service](/mail-service/README.md)
+- [Listener-service](/listener-service/README.md)
 
 In the `project` can be found all files with basic commands and the main `docker-compose.yml`
 
-To start broker service, logger service, authentication service, and front-end service, you need to clone this repository and go to `project`:
+To start all back-end services, you need to clone this repository and go to `project`:
 ```
 git clone git@github.com:GermanLepin/my_broker.git
 cd project/
 ```
 
-Lets start broker service, logger service, and authentication service with the command:
+Let's start all back-end services with the command:
 ```
 make up_build
 ```
 
 To start front-end service, use the command:
 ```
-make start
+make front_end_start
 ```
+
+address of the main page: http://localhost
+address of the mailHog: http://localhost:8025
 
 To stop front-end service, use the command:
 ```
-make stop
+make front_end_stop
 ```
 
-To stop broker service, logger service, and authentication service, use the command:
+To stop back-end services, use the command:
 ```
 make down
 ```
