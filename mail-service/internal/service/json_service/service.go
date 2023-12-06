@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"mailer-service/internal/dto"
+
+	"mail-service/internal/dto"
+
 	"net/http"
 )
 

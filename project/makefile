@@ -1,6 +1,6 @@
 FRONT_END_BINARY=binary_file/frontEndServiceApp
-BROKER_BINARY=binary_file/brokerServiceApp
 AUTHENTICATION_BINARY=binary_file/authenticationServiceApp
+BROKER_BINARY=binary_file/brokerServiceApp
 LOGGER_BINARY=binary_file/loggerServiceApp
 MAIL_BINARY=binary_file/mailServiceApp
 
@@ -11,7 +11,7 @@ up:
 	@echo "Docker images started!"
 
 ## up_build: stops docker-compose (if running), builds all projects and starts docker compose
-up_build: build_broker build_authentication build_logger build_mail
+up_build: build_authentication build_broker build_logger build_mail
 	@echo "Stopping docker images (if running...)"
 	docker-compose down
 	@echo "Building (when required) and starting docker images..."
@@ -24,16 +24,16 @@ down:
 	docker-compose down
 	@echo "Done!"
 
-## broker: builds the broker binary as a linux executable
-build_broker:
-	@echo "Building broker binary..."
-	cd ../broker-service && env GOOS=linux CGO_ENABLED=0 go build -o ${BROKER_BINARY} ./cmd/service
-	@echo "Done!"
-
 ## authentication: builds the authentication binary as a linux executable
 build_authentication:
 	@echo "Building authentication binary..."
 	cd ../authentication-service && env GOOS=linux CGO_ENABLED=0 go build -o ${AUTHENTICATION_BINARY} ./cmd/service
+	@echo "Done!"
+
+## broker: builds the broker binary as a linux executable
+build_broker:
+	@echo "Building broker binary..."
+	cd ../broker-service && env GOOS=linux CGO_ENABLED=0 go build -o ${BROKER_BINARY} ./cmd/service
 	@echo "Done!"
 
 ## logger: builds the logger binary as a linux executable
@@ -48,19 +48,19 @@ build_mail:
 	cd ../mail-service && env GOOS=linux CGO_ENABLED=0 go build -o ${MAIL_BINARY} ./cmd/service
 	@echo "Done!"
 
-## build_front: builds the frone end binary
-build_front:
+## build_front_end: builds the frone end binary
+build_front_end:
 	@echo "Building front end binary..."
 	cd ../front-end-service && env CGO_ENABLED=0 go build -o ${FRONT_END_BINARY} ./cmd/web
 	@echo "Done!"
 
 ## start: starts the front end
-start: build_front
+front_end_start: build_front_end
 	@echo "Starting front end"
 	cd ../front-end-service && ./${FRONT_END_BINARY} &
 
 ## stop: stops the front end
-stop:
+front_end_stop:
 	@echo "Stopping front end..."
 	@-pkill -SIGTERM -f "./${FRONT_END_BINARY}"
 	@echo "Stopped front end!"

@@ -28,42 +28,11 @@ func (s *service) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 		s.authenticate(w, requestPayload.AuthenticationPayload)
 	case "logging":
 		s.loggingItem(w, requestPayload.LoggingPayload)
+	case "mail":
+		s.sendMail(w, requestPayload.MailPayload)
 	default:
 		s.jsonService.ErrorJSON(w, errors.New("unknown action"))
 	}
-}
-
-func (s *service) loggingItem(w http.ResponseWriter, entry dto.LoggingPayload) {
-	jsonData, _ := json.MarshalIndent(entry, "", "\t")
-
-	loggerServiceURL := "http://logger-service/log"
-
-	request, err := http.NewRequest(http.MethodPost, loggerServiceURL, bytes.NewBuffer(jsonData))
-	if err != nil {
-		s.jsonService.ErrorJSON(w, err)
-		return
-	}
-
-	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		s.jsonService.ErrorJSON(w, err)
-		return
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusAccepted {
-		s.jsonService.ErrorJSON(w, err)
-		return
-	}
-
-	var payload dto.JsonResponse
-	payload.Error = false
-	payload.Message = "logged"
-
-	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
 }
 
 func (s *service) authenticate(w http.ResponseWriter, entry dto.AuthenticationPayload) {
@@ -111,6 +80,72 @@ func (s *service) authenticate(w http.ResponseWriter, entry dto.AuthenticationPa
 	payload.Error = false
 	payload.Message = "authenticated"
 	payload.Data = jsonFromService.Data
+
+	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
+}
+
+func (s *service) loggingItem(w http.ResponseWriter, entry dto.LoggingPayload) {
+	jsonData, _ := json.MarshalIndent(entry, "", "\t")
+
+	loggerServiceURL := "http://logger-service/log"
+
+	request, err := http.NewRequest(http.MethodPost, loggerServiceURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		s.jsonService.ErrorJSON(w, err)
+		return
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		s.jsonService.ErrorJSON(w, err)
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusAccepted {
+		s.jsonService.ErrorJSON(w, errors.New("error calling looger service"))
+		return
+	}
+
+	var payload dto.JsonResponse
+	payload.Error = false
+	payload.Message = "logged"
+
+	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
+}
+
+func (s *service) sendMail(w http.ResponseWriter, msg dto.MailPayload) {
+	jsonData, _ := json.MarshalIndent(msg, "", "\t")
+
+	mailServiceURL := "http://mail-service/send"
+
+	request, err := http.NewRequest(http.MethodPost, mailServiceURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		s.jsonService.ErrorJSON(w, err)
+		return
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		s.jsonService.ErrorJSON(w, err)
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusAccepted {
+		s.jsonService.ErrorJSON(w, errors.New("error calling mail service"))
+		return
+	}
+
+	var payload dto.JsonResponse
+	payload.Error = false
+	payload.Message = "message sent to " + msg.To
 
 	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
 }

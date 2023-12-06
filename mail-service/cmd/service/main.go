@@ -6,10 +6,10 @@ import (
 	"os"
 	"strconv"
 
-	"mailer-service/internal/application/adapter/api/routes"
-	"mailer-service/internal/dto"
-	"mailer-service/internal/service/json_service"
-	"mailer-service/internal/service/mail_service"
+	"mail-service/internal/application/adapter/api/routes"
+	"mail-service/internal/dto"
+	"mail-service/internal/service/json_service"
+	"mail-service/internal/service/mail_service"
 
 	"net/http"
 )

@@ -2,10 +2,11 @@ package mail_service
 
 import (
 	"bytes"
-	"mailer-service/internal/dto"
 	"net/http"
 	"text/template"
 	"time"
+
+	"mail-service/internal/dto"
 
 	"github.com/vanng822/go-premailer/premailer"
 	mail "github.com/xhit/go-simple-mail/v2"
