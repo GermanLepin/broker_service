@@ -2,10 +2,14 @@ package handle_submission_service
 
 import (
 	"broker-service/internal/dto"
+	"broker-service/internal/event"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type JsonService interface {
@@ -17,6 +21,8 @@ type JsonService interface {
 func (s *service) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 	var requestPayload dto.RequestPayload
 
+	ctx := context.Background()
+
 	err := s.jsonService.ReadJSON(w, r, &requestPayload)
 	if err != nil {
 		s.jsonService.ErrorJSON(w, err, http.StatusBadRequest)
@@ -27,7 +33,7 @@ func (s *service) HandleSubmission(w http.ResponseWriter, r *http.Request) {
 	case "authentication":
 		s.authenticate(w, requestPayload.AuthenticationPayload)
 	case "logging":
-		s.loggingItem(w, requestPayload.LoggingPayload)
+		s.loggingEventViaRabbitmq(ctx, w, requestPayload.LoggingPayload)
 	case "mail":
 		s.sendMail(w, requestPayload.MailPayload)
 	default:
@@ -150,12 +156,51 @@ func (s *service) sendMail(w http.ResponseWriter, msg dto.MailPayload) {
 	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
 }
 
-func New(jsonService JsonService) *service {
+func (s *service) loggingEventViaRabbitmq(ctx context.Context, w http.ResponseWriter, l dto.LoggingPayload) {
+	err := s.pushToQueue(ctx, l.Name, l.Data)
+	if err != nil {
+		s.jsonService.ErrorJSON(w, err)
+		return
+	}
+
+	var payload dto.JsonResponse
+	payload.Error = false
+	payload.Message = "logged via RabbitMQ"
+
+	s.jsonService.WriteJSON(w, http.StatusAccepted, payload)
+}
+
+func (s *service) pushToQueue(ctx context.Context, name, msg string) error {
+	emitter, err := event.NewEventEmitter(s.rabbitmq)
+	if err != nil {
+		return err
+	}
+
+	payload := dto.LoggingPayload{
+		Name: name,
+		Data: msg,
+	}
+
+	j, _ := json.MarshalIndent(&payload, "", "\t")
+	err = emitter.Push(ctx, string(j), "log.INFO")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func New(
+	rabbitmqConnection *amqp.Connection,
+	jsonService JsonService,
+) *service {
 	return &service{
+		rabbitmq:    rabbitmqConnection,
 		jsonService: jsonService,
 	}
 }
 
 type service struct {
+	rabbitmq    *amqp.Connection
 	jsonService JsonService
 }

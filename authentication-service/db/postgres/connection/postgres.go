@@ -36,13 +36,13 @@ func connectToDB() *sql.DB {
 	var counts int64
 
 	for {
-		connection, err := openDB(dsn)
+		conn, err := openDB(dsn)
 		if err != nil {
 			log.Println("postgres is not ready yet")
 			counts++
 		} else {
 			log.Println("connected to Postgres!")
-			return connection
+			return conn
 		}
 
 		if counts > 10 {
