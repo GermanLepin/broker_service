@@ -11,8 +11,8 @@ import (
 )
 
 type Consumer struct {
-	conn      *amqp.Connection
-	queueName string
+	connection *amqp.Connection
+	queueName  string
 }
 
 type Payload struct {
@@ -20,9 +20,9 @@ type Payload struct {
 	Data string `json:"data"`
 }
 
-func NewConnection(connection *amqp.Connection) (Consumer, error) {
+func NewConnection(conn *amqp.Connection) (Consumer, error) {
 	consumer := Consumer{
-		conn: connection,
+		connection: conn,
 	}
 
 	if err := consumer.setup(); err != nil {
@@ -33,7 +33,7 @@ func NewConnection(connection *amqp.Connection) (Consumer, error) {
 }
 
 func (c *Consumer) setup() error {
-	channel, err := c.conn.Channel()
+	channel, err := c.connection.Channel()
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (c *Consumer) setup() error {
 }
 
 func (c *Consumer) Listen(topics []string) error {
-	ch, err := c.conn.Channel()
+	ch, err := c.connection.Channel()
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (c *Consumer) Listen(topics []string) error {
 		}
 	}()
 
-	fmt.Printf("waiting for a message [Exhange, Queue] [logs_topic, %s]\n", queue.Name)
+	fmt.Printf("Waiting for a message [Exhange, Queue] [logs_topic, %s]\n", queue.Name)
 	<-foreverChan
 
 	return nil

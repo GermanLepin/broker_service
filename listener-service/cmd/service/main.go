@@ -8,16 +8,16 @@ import (
 )
 
 func main() {
-	rabbitMQConnection, err := connection.ConnectToRabbitMQ()
+	rabbitMQConn, err := connection.ConnectToRabbitMQ()
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	defer rabbitMQConnection.Close()
+	defer rabbitMQConn.Close()
 
 	log.Println("listing for and consuming RabbitMQ messages...")
 
-	consumer, err := event.NewConnection(rabbitMQConnection)
+	consumer, err := event.NewConnection(rabbitMQConn)
 	if err != nil {
 		panic(err)
 	}

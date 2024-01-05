@@ -1,7 +1,7 @@
 My broker
 =============
 
-In this repository, I have designed six services. The front-end part is already created, and the authentication service, broker service, mail service, listener service,and logger service are also written.
+In this repository, I have designed six services. The front-end part is already created, and the authentication service, broker service, mail service, listener service, and logger service are also written.
 
 More information about every service can be found below:
 - [Front-end-service](/front-end-service/README.md)
@@ -29,7 +29,7 @@ To start front-end service, use the command:
 make front_end_start
 ```
 
-address of the main page: http://localhost
+address of the main page: http://localhost:80
 address of the mailHog: http://localhost:8025
 
 To stop front-end service, use the command:
