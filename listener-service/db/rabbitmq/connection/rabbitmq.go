@@ -3,17 +3,21 @@ package connection
 import (
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 const (
-	rabbitMQURL = "amqp://guest:guest@localhost"
+	rabbitMQURL = "amqp://guest:guest@rabbitmq"
 )
 
 func ConnectToRabbitMQ() (*amqp.Connection, error) {
-	var counts int64
+	var (
+		counts  int64
+		backOff = 1 * time.Second
+	)
 
 	for {
 		connection, err := amqp.Dial(rabbitMQURL)
@@ -25,13 +29,14 @@ func ConnectToRabbitMQ() (*amqp.Connection, error) {
 			return connection, nil
 		}
 
-		if counts > 10 {
+		if counts > 5 {
 			fmt.Println(err)
 			return nil, err
 		}
 
-		log.Println("backing off for 2 seconds...")
-		time.Sleep(2 * time.Second)
+		backOff = time.Duration(math.Pow(float64(counts), 2)) * time.Second
+		log.Println("backing off...")
+		time.Sleep(backOff)
 		continue
 	}
 }

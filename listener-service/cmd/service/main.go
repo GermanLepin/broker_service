@@ -2,6 +2,7 @@ package main
 
 import (
 	"listener-service/db/rabbitmq/connection"
+	"listener-service/internal/event"
 	"log"
 	"os"
 )
@@ -14,4 +15,17 @@ func main() {
 	}
 	defer rabbitMQConnection.Close()
 
+	log.Println("listing for and consuming RabbitMQ messages...")
+
+	consumer, err := event.NewConnection(rabbitMQConnection)
+	if err != nil {
+		panic(err)
+	}
+
+	topics := []string{"log.INFO", "log.WARNING", "log.ERROR"}
+
+	err = consumer.Listen(topics)
+	if err != nil {
+		log.Println(err)
+	}
 }
